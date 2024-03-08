@@ -1,0 +1,9 @@
+## Copilot
+This is a piece of inline assembly code in C. It's using the GCC's __asm__ goto extension, which allows for computed jumps to labels in C code from inline assembly. Here's a breakdown of what it does:
+- "lgdt %0\n": This instruction loads the Global Descriptor Table (GDT) register with the address and limit specified in the memory operand (gdtptr).
+- "leaq %l[jump_to_new_cs](%%rip), %%rax\n": This instruction loads the effective address of the label jump_to_new_cs relative to the instruction pointer (rip) into the rax register.
+- "pushq %1\n" and "pushq %%rax\n": These instructions push the value of GDT_DESC_OFFSET(GDT_DESC_CODE) and the address stored in rax onto the stack. This sets up the far return.
+- "lretq\n": This instruction pops the return address and a code segment selector from the stack, and then performs a far return to the popped address in the popped segment.
+The : "m"(gdtptr), "i"(GDT_DESC_OFFSET(GDT_DESC_CODE)) part after the assembly code is specifying the inputs to the assembly code. "m"(gdtptr) means that gdtptr is a memory operand and "i"(GDT_DESC_OFFSET(GDT_DESC_CODE)) means that GDT_DESC_OFFSET(GDT_DESC_CODE) is an immediate integer operand.
+The : "rax", "memory" part is the clobber list, which tells the compiler that the inline assembly code may modify the rax register and memory.
+The : jump_to_new_cs part is specifying the output labels that the assembly code may jump to. In this case, it's the jump_to_new_cs label. This is a feature of the __asm__ goto statement.
